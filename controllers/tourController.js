@@ -9,3 +9,14 @@ export const getTours = async (req, res) => {
     }
     
 }
+
+export const createTour = async (req, res) => {
+    const tour = new Tour(req.body);
+    try {
+        const createdTour = await tour.save();
+        res.status(201).json(createdTour);
+    } catch (error) {
+        res.status(400).json({message: error.message});
+    }
+    
+}
