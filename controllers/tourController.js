@@ -20,3 +20,12 @@ export const createTour = async (req, res) => {
     }
     
 }
+
+export const updateTour = async (req, res) => {
+    try {
+        const updatedTour = await Tour.updateOne({_id: req.params.id}, {$set: req.body});
+        res.status(200).json(updatedTour);
+    } catch {
+        res.status(400).json({message: error.message});
+    }
+}
