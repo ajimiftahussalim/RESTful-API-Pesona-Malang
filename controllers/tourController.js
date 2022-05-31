@@ -1,54 +1,150 @@
 import Tour from '../models/Tour.js';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import fs from 'fs';
 
 export const getTours = async (req, res) => {
-    try {
-        const tours = await Tour.find();
-        res.json(tours);
-    } catch (error) {
+    Tour.find()
+    .then(result => {
+        res.status(200).json({
+            message: 'Tour data succesfully called',
+            data: result
+        });
+    })
+    .catch(error => {
         res.status(500).json({message: error.message});
-    }
-    
-}
+    })
+};
 
 export const getTourById = async (req, res) => {
-    try {
-        const tour = await Tour.findById(req.params.id);
-        res.json(tour);
-    } catch (error) {
+    const tourId = req.params.id;
+    Tour.findById(tourId)
+    .then(result => {
+        if(!result) {
+            const error = new Error('Tour data not found');
+            error.errorStatus = 404;
+            throw error;
+        }
+        res.status(200).json({
+            message: 'Tour data succesfully called',
+            data: result
+        });
+    })
+    .catch(error => {
         res.status(404).json({message: error.message});
-    } 
-}
+    })
+};
 
 export const createTour = async (req, res) => {
-    const tour = new Tour(req.body);
-    try {
-        const createdTour = await tour.save();
-        res.status(201).json(createdTour);
-    } catch (error) {
-        res.status(400).json({message: error.message});
+    if(!req.file) {
+        const err = new Error('Image must be uploaded');
+        err.errorStatus = 422;
+        throw err;
     }
+
+    const name = req.body.name;
+    const category = req.body.category;
+    const address = req.body.address;
+    const operationalHour = req.body.operationalHour;
+    const ticket = req.body.ticket;
+    const description = req.body.description;
+    const image = req.file.path;
+
+    const tour = new Tour({
+        name: name,
+        category: category,
+        address: address,
+        operationalHour: operationalHour,
+        ticket: ticket,
+        description: description,
+        image: image
+    });
     
-}
+    tour.save()
+    .then(result => {
+        res.status(201).json({
+            message: 'Create Tour Success',
+            data: result
+        });
+    })
+    .catch (error => {
+        res.status(400).json({message: error.message});
+    })
+};
 
 export const updateTour = async (req, res) => {
-    const cekId = await Tour.findById(req.params.id);
-    if(!cekId) return res.status(404).json({message: "Data tidak ditemukan"});
-    try {
-        const updatedTour = await Tour.updateOne({_id: req.params.id}, {$set: req.body});
-        res.status(200).json(updatedTour);
-    } catch {
-        res.status(400).json({message: error.message});
+    if(!req.file) {
+        const err = new Error('Image must be uploaded');
+        err.errorStatus = 422;
+        throw err;
     }
+
+    const name = req.body.name;
+    const category = req.body.category;
+    const address = req.body.address;
+    const operationalHour = req.body.operationalHour;
+    const ticket = req.body.ticket;
+    const description = req.body.description;
+    const image = req.file.path;
+    const tourId = req.params.id;
+
+    Tour.findById(tourId)
+    .then(tour => {
+        if(!tour) {
+            const error = new Error('Tour data not found');
+            error.errorStatus = 404;
+            throw error;
+        }
+
+        tour.name = name;
+        tour.category = category;
+        tour.address = address;
+        tour.operationalHour = operationalHour;
+        tour.ticket = ticket;
+        tour.description = description;
+        tour.image = image;
+
+        return tour.save();
+    })
+    .then(result => {
+        res.status(200).json({
+            message: 'Update Succesfully',
+            data: result
+        });
+    })
+    .catch (error => {
+        res.status(400).json({message: error.message});
+    })
 }
 
-export const deleteTour = async (req, res) => {
-    const cekId = await Tour.findById(req.params.id);
-    if(!cekId) return res.status(404).json({message: "Data tidak ditemukan"});
-    try {
-        const deletedTour = await Tour.deleteOne({id: req.params.id});
-        res.status(200).json(deletedTour);
-    } catch (error) {
+export const deleteTour = async (req, res, next) => {
+    const tourId = req.params.id;
+
+    Tour.findById(tourId)
+    .then(tour => {
+        if(!tour) {
+            const error = new Error('Tour data not found');
+            error.errorStatus = 404;
+            throw error;
+        }
+
+        removeImage(tour.image);
+        return Tour.findByIdAndRemove(tourId);
+    })
+    .then(result => {
+        res.status(200).json({
+            message: 'Delete tour data successfully',
+            data: result,
+        })
+    })
+    .catch (error => {
         res.status(400).json({message: error.message});
-    }
-    
+    })
+}
+
+const removeImage = (filePath) => {
+    const __filename = fileURLToPath(import.meta.url);
+    const __dirname = path.dirname(__filename);
+    filePath = path.join(__dirname, '../', filePath);
+    fs.unlink(filePath, err => console.log(err));
 }
