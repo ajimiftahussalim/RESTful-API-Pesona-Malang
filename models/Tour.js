@@ -1,30 +1,36 @@
 import mongoose from "mongoose";
 
 const Tour = mongoose.Schema({
-    nama: {
+    name: {
         type: String,
         required: true
     },
-    kategori: {
+    category: {
         type: String,
         required: true
     },
-    alamat: {
+    address: {
         type: String,
         required: true
     },
-    jamOperasional: {
+    operationalHour: {
         type: String,
         required: true
     },
-    tiket: {
+    ticket: {
         type: String,
         required: true
     },
-    deskripsi: {
+    description: {
+        type: String,
+        required: true
+    },
+    image: {
         type: String,
         required: true
     }
+}, {
+    timestamps: true
 });
 
-export default mongoose.model('Tours', Tour);
+export default mongoose.model('Tour', Tour);
