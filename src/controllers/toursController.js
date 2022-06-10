@@ -3,9 +3,8 @@ const fs = require('fs');
 const Tour = require('../models/tour');
 
 exports.createTour = (req, res, next) => {
-
     if(!req.file) {
-        const err = new Error('Image harus di upload');
+        const err = new Error('Image must be uploaded');
         err.errorStatus = 422;
         throw err;
     }
@@ -42,7 +41,7 @@ exports.createTour = (req, res, next) => {
 
 exports.getAllTour = (req, res, next) => {
     const currentPage = req.query.page || 1;
-    const perPage = req.query.perPage || 5;
+    const perPage = req.query.perPage || 100;
     let totalItems;
 
     Tour.find()
@@ -87,9 +86,8 @@ exports.getTourById = (req, res, next) => {
 }
 
 exports.updateTour = (req, res, next) => {
-
     if(!req.file) {
-        const err = new Error('Image harus di upload');
+        const err = new Error('Image must be uploaded');
         err.errorStatus = 422;
         throw err;
     }
@@ -106,7 +104,7 @@ exports.updateTour = (req, res, next) => {
     Tour.findById(tourId)
     .then(tour => {
         if(!tour) {
-            const err = new Error('Blog post tidak ditemukan');
+            const err = new Error('Tour data not found');
             err.errorStatus = 404;
             throw err;
         }
