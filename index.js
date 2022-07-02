@@ -55,6 +55,6 @@ app.use((error, req, res, next) => {
 
 mongoose.connect(process.env.DB)
 .then(() => {
-    app.listen(4000, () => console.log('Connection Success'));;
+    app.listen(process.env.PORT || 4000, () => console.log('Connection Success'));;
 })
 .catch(err => console.log(err));
